@@ -27,7 +27,9 @@ define(['questAPI'], function(Quest){
                 : 'Выберите подходящий вариант ответа''
         },
         autoSubmit:'true',
-        numericValues:'true'
+        numericValues:'true',
+		help: false,
+		helpText: '' 
     });
 
     API.addQuestionsSet('basicSelect',{
