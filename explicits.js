@@ -27,9 +27,7 @@ define(['questAPI'], function(Quest){
                 : 'Выберите подходящий вариант ответа, или нажмите \'Отказ от ответа\''
         },
         autoSubmit:'true',
-        numericValues:'true',
-        help: '<%= pagesMeta.number < 3 %>',
-        helpText: 'Для быстрого ответа нажмите на подходящий вариант дважды.'
+        numericValues:'true'
     });
 
     API.addQuestionsSet('basicSelect',{
