@@ -67,6 +67,25 @@ define(['questAPI'], function(Quest){
         stem: 'Если бы завтра проводилась перепись населения и можно было выбрать только одну национальность, какую бы вы указали?'
     });
 
+	API.addQuestionsSet('ethnicMain',{
+		inherit : 'basicSelect',
+		name: 'ethnic_main',
+		stem: 'К какой национальности Вы относите себя в первую очередь?',
+		answers: [
+			{text:'Русские',   value:1},
+        	{text:'Башкиры',   value:2},
+        	{text:'Татары',    value:3},
+        	{text:'Чуваши',    value:4},
+        	{text:'Марийцы',   value:5},
+        	{text:'Удмурты',   value:6},
+        	{text:'Украинцы',  value:7},
+        	{text:'Мордва',    value:8},
+        	{text:'Белорусы',  value:9},
+        	{text:'Армяне',    value:10},
+        	{text:'Другое',    value:11}
+    	]
+	});
+
     // 2. Оценка одиночества / потерянности после первого отъезда из дома
     API.addQuestionsSet('lonelinessMove',{
         inherit : 'basicSelect',
