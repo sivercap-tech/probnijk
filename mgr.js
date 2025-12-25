@@ -167,7 +167,7 @@ define(['managerAPI',
 		{inherit: 'feedback'},
 		{inherit: 'uploading'},
         {inherit: 'lastpage'},
-        {inherit: 'redirect'}
+    	// {inherit: 'redirect'}
     ]);
 
     return API.script;
