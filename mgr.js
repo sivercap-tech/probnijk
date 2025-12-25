@@ -74,6 +74,12 @@ define(['managerAPI',
             scriptUrl: 'explicits.js'
         }],
 
+		feedback: [{
+        type: 'quest',
+        name: 'feedback',
+        scriptUrl: 'feedback.js'
+		}],
+
         raceiat: [{
             type: 'time',
             name: 'raceiat',
@@ -158,6 +164,7 @@ define(['managerAPI',
             ]
         },
 
+		{inherit: 'feedback'},
 		{inherit: 'uploading'},
         {inherit: 'lastpage'},
         {inherit: 'redirect'}
