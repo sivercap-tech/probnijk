@@ -82,7 +82,7 @@ define(['managerAPI',
         return csv;
     }
 
-    function sendToYandex(input, context) {
+    function sendToYandex() {
         // Получаем все логи текущей сессии
         var allLogs = window.minnoJS.logger.getLogs(); 
         var csvData = logsToCSV(allLogs);
@@ -171,10 +171,34 @@ define(['managerAPI',
             url: 'https://anketolog.ru/rs/993764/kI8Z0LUH' + respondentId 
         }],
 		
+        // ИСПРАВЛЕНИЕ: Заменили type: 'call' на 'message' с авто-продолжением
         uploading: [{
-            type: 'call',
-            func: sendToYandex,
-            isAsync: true // Ждем завершения отправки
+            type: 'message',
+            name: 'uploading',
+            buttonText: 'Продолжить', // Текст кнопки на случай ошибки
+            template: '<div style="text-align:center; margin-top:50px;">' +
+                      '<h3>Сохранение результатов...</h3>' +
+                      '<p>Пожалуйста, подождите, данные отправляются на сервер.</p>' +
+                      '</div>',
+            onShow: function() {
+                var task = this;
+                var btn = document.querySelector('.btn-primary') || document.querySelector('button');
+                if (btn) btn.style.display = 'none'; // Скрываем кнопку, чтобы пользователь не нажал раньше времени
+
+                sendToYandex()
+                    .then(function() {
+                        // Успех - идем дальше
+                        if (btn) btn.click(); 
+                    })
+                    .catch(function(err) {
+                        console.error('Upload error in task:', err);
+                        // Если ошибка - показываем кнопку, чтобы можно было хотя бы завершить тест
+                        if (btn) {
+                            btn.style.display = 'inline-block';
+                            btn.innerText = 'Продолжить (ошибка сети)';
+                        }
+                    });
+            }
         }]    
     });
 
