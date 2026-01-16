@@ -159,8 +159,8 @@ define(['managerAPI',
         },
 
 		{inherit: 'feedback'},
-		{inherit: 'uploading'}, // Сначала загружаем данные
-        {inherit: 'lastpage'},  // Показываем страницу "Спасибо"
+		{inherit: 'uploading'}, 
+        {inherit: 'lastpage'},  
         
         {inherit: 'redirect_success'}
 	]);
