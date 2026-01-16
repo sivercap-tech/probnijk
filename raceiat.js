@@ -90,10 +90,18 @@ define(['pipAPI','./iat10_ru.js'], function(APIConstructor, iatExtension){
                 stimulusCss : { color:'#0000FF','font-size':'2.3em' }
             },
         
+        // --- НАСТРОЙКИ ДЛЯ БЫСТРОГО ТЕСТА (DEBUG) ---
+        // Уменьшаем количество проб, чтобы быстро пройти тест
+        blockAttributes_nTrials : 2,
+        blockCategories_nTrials : 2,
+        blockFirstCombined_nTrials : 4,
+        blockSecondCombined_nTrials : 4,
+        blockSwitch_nTrials : 2,
+        // --------------------------------------------
+
         base_url : {//Where are your images at?
             image : global.baseURL
         },
         isTouch : global.$isTouch
     });
 });
-
