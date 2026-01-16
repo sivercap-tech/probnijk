@@ -1,6 +1,14 @@
 define(['managerAPI',
 		'https://cdn.jsdelivr.net/gh/minnojs/minno-datapipe@1.*/datapipe.min.js'], function(Manager){
+	const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+	const respondentId = urlParams.get('uid') || 'NO_ID'; 
 
+	var API    = new Manager();
+	
+	API.addGlobal({
+        respondentId: respondentId
+    });
 
 	//You can use the commented-out code to get parameters from the URL.
 	//const queryString = window.location.search;
@@ -96,11 +104,12 @@ define(['managerAPI',
             header: 'You have completed the study'
         }], 
         
-        //Use if you want to redirect the participants elsewhere at the end of the study
-        // redirect:
-        // [{ 
-        //     type:'redirect', name:'redirecting', url: 'https://www.google.com/search' 
-        // }],
+       redirect_success: [{ 
+            type: 'redirect', 
+            name: 'redirecting_success', 
+            // Укажите ваш URL возврата. Мы добавляем к нему ID и статус.
+            url: 'https://YOUR-SITE.com/return?status=complete&uid=' + respondentId 
+        }],
 		
 		//This task waits until the data are sent to the server.
         uploading: uploading_task({header: 'just a moment', body:'Please wait, sending data... '})
@@ -168,7 +177,33 @@ define(['managerAPI',
 		{inherit: 'uploading'},
         {inherit: 'lastpage'},
     	// {inherit: 'redirect'}
-    ]);
+    { type: 'isTouch' }, 
+        { type: 'post', path: ['$isTouch', 'raceSet', 'blackLabels', 'whiteLabels'] },
+        
+        // ... стили и другие миксеры ...
+        
+        {inherit: 'intro'},
+        {
+            mixer:'random',
+            data:[
+                {inherit: 'explicits'},
+                {
+                    mixer: 'wrapper',
+                    data: [
+                        {inherit: 'raceiat_instructions'},
+                        {inherit: 'raceiat'}
+                    ]
+                }
+            ]
+        },
+
+        {inherit: 'feedback'},
+        {inherit: 'uploading'},
+        {inherit: 'lastpage'}, // Страница "Спасибо" с кнопкой
+        
+        // 3. ДОБАВЛЯЕМ РЕДИРЕКТ В КОНЕЦ
+        {inherit: 'redirect_success'}
+	]);
 
     return API.script;
 });
