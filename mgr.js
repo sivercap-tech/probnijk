@@ -1,28 +1,28 @@
 define(['managerAPI',
 		'https://cdn.jsdelivr.net/gh/minnojs/minno-datapipe@1.*/datapipe.min.js'], function(Manager){
+
+    // 1. ПОЛУЧЕНИЕ ID РЕСПОНДЕНТА ИЗ ССЫЛКИ
+    // Скрипт ищет параметр 'uid' в адресной строке.
+    // Если ссылка вида: .../exampleiat.html?uid=USER_123
+    // То respondentId будет равен 'USER_123'
 	const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
 	const respondentId = urlParams.get('uid') || 'NO_ID'; 
 
 	var API    = new Manager();
 	
+    // Сохраняем ID глобально, чтобы он был доступен везде
 	API.addGlobal({
         respondentId: respondentId
     });
 
-	//You can use the commented-out code to get parameters from the URL.
-	//const queryString = window.location.search;
-    //const urlParams = new URLSearchParams(queryString);
-    //const pt = urlParams.get('pt');
-
-	var API    = new Manager();
-	//const subid = Date.now().toString(16)+Math.floor(Math.random()*10000).toString(16);
+	// Инициализация DataPipe для сохранения данных
 	init_data_pipe(API, 'gwZKTRm7QDHI',  {file_type:'csv'});	
 
     API.setName('mgr');
     API.addSettings('skip',true);
 
-    //Randomly select which of two sets of category labels to use.
+    // Случайный выбор набора меток (raceSet)
     let raceSet = API.shuffle(['a','b'])[0];
     let blackLabels = [];
     let whiteLabels = [];
@@ -37,13 +37,11 @@ define(['managerAPI',
 
     API.addGlobal({
         raceiat:{},
-        //YBYB: change when copying back to the correct folder
         baseURL: './images/',
         raceSet:raceSet,
         blackLabels:blackLabels,
         whiteLabels:whiteLabels,
-        //Select randomly what attribute words to see. 
-        //Based on Axt, Feng, & Bar-Anan (2021).
+        // Случайный выбор слов для атрибутов (Axt, Feng, & Bar-Anan, 2021)
         baWords : API.shuffle([
             'Сабантуй', 'Бешбармак', 'Урал-Батыр',
             'Агидель', 'Бешмет', 'Курай', 'Юрта', 'Кумыс', 'Тюбитейка'
@@ -83,9 +81,9 @@ define(['managerAPI',
         }],
 
 		feedback: [{
-        type: 'quest',
-        name: 'feedback',
-        scriptUrl: 'feedback.js'
+            type: 'quest',
+            name: 'feedback',
+            scriptUrl: 'feedback.js'
 		}],
 
         raceiat: [{
@@ -99,28 +97,30 @@ define(['managerAPI',
             name: 'lastpage',
             templateUrl: 'lastpage.jst',
             title: 'End',
-            //Uncomment the following if you want to end the study here.
-            //last:true, 
             header: 'You have completed the study'
         }], 
         
+       // 2. НАСТРОЙКА РЕДИРЕКТА
        redirect_success: [{ 
             type: 'redirect', 
             name: 'redirecting_success', 
-            // Укажите ваш URL возврата. Мы добавляем к нему ID и статус.
-            url: 'https://YOUR-SITE.com/return?status=complete&uid=' + respondentId 
+            // ВАЖНО: Замените ссылку ниже на ту, которую дал заказчик/партнер.
+            // Скрипт автоматически добавит ID (uid) и статус (complete).
+            // Например: 'https://panel-provider.com/complete?status=complete&uid=' + respondentId
+            url: 'https://YOUR-PARTNER-SITE.com/return?status=complete&uid=' + respondentId 
         }],
 		
-		//This task waits until the data are sent to the server.
+		// Задача ожидания загрузки данных на сервер
         uploading: uploading_task({header: 'just a moment', body:'Please wait, sending data... '})
     });
 
+    // 3. ПОСЛЕДОВАТЕЛЬНОСТЬ ЗАДАНИЙ
     API.addSequence([
-        { type: 'isTouch' }, //Use Minno's internal touch detection mechanism. 
+        { type: 'isTouch' }, // Определение тач-устройства
         
         { type: 'post', path: ['$isTouch', 'raceSet', 'blackLabels', 'whiteLabels'] },
 
-        // apply touch only styles
+        // Применение стилей для тач-устройств
         {
             mixer:'branch',
             conditions: {compare:'global.$isTouch', to: true},
@@ -155,14 +155,13 @@ define(['managerAPI',
             ]
         },
         
-        
         {inherit: 'intro'},
         {
             mixer:'random',
             data:[
                 {inherit: 'explicits'},
 
-                // force the instructions to preceed the iat
+                // IAT тест и инструкции всегда вместе
                 {
                     mixer: 'wrapper',
                     data: [
@@ -174,34 +173,10 @@ define(['managerAPI',
         },
 
 		{inherit: 'feedback'},
-		{inherit: 'uploading'},
-        {inherit: 'lastpage'},
-    	// {inherit: 'redirect'}
-    { type: 'isTouch' }, 
-        { type: 'post', path: ['$isTouch', 'raceSet', 'blackLabels', 'whiteLabels'] },
+		{inherit: 'uploading'}, // Сначала загружаем данные
+        {inherit: 'lastpage'},  // Показываем страницу "Спасибо"
         
-        // ... стили и другие миксеры ...
-        
-        {inherit: 'intro'},
-        {
-            mixer:'random',
-            data:[
-                {inherit: 'explicits'},
-                {
-                    mixer: 'wrapper',
-                    data: [
-                        {inherit: 'raceiat_instructions'},
-                        {inherit: 'raceiat'}
-                    ]
-                }
-            ]
-        },
-
-        {inherit: 'feedback'},
-        {inherit: 'uploading'},
-        {inherit: 'lastpage'}, // Страница "Спасибо" с кнопкой
-        
-        // 3. ДОБАВЛЯЕМ РЕДИРЕКТ В КОНЕЦ
+        // В самом конце - перенаправляем пользователя обратно к партнеру
         {inherit: 'redirect_success'}
 	]);
 
