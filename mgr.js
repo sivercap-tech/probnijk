@@ -11,8 +11,6 @@ define(['managerAPI',
         respondentId: respondentId
     });
 
-	// init_data_pipe(API, 'gwZKTRm7QDHI',  {file_type:'csv'});	
-
     API.setName('mgr');
     API.addSettings('skip',true);
 
@@ -44,9 +42,11 @@ define(['managerAPI',
             'Волга', 'Кокошник', 'Балалайка', 'Изба', 'Квас', 'Шапка-ушанка'
         ])
     });
-// --- НАЧАЛО БЛОКА ОТПРАВКИ В ЯНДЕКС ---
 
+    // --- НАЧАЛО БЛОКА ОТПРАВКИ В ЯНДЕКС ---
+    // ВАЖНО: Убедитесь, что эта ссылка ведет на вашу актуальную функцию
     const YANDEX_FUNCTION_URL = "https://functions.yandexcloud.net/d4ekhluuh9cjf4on17pa";
+    
     function logsToCSV(logs) {
         if (!logs || !logs.length) return "";
         var headers = new Set();
@@ -90,8 +90,9 @@ define(['managerAPI',
         var csvData = logsToCSV(allLogs);
         
         var globalData = API.getGlobal();
-        var respondentId = globalData.respondentId || 'unknown';
-        var fileName = 'iat_data_' + respondentId + '.csv';
+        var currentRespondentId = globalData.respondentId || 'unknown';
+        // Имя файла для сохранения
+        var fileName = 'iat_data_' + currentRespondentId + '.csv';
 
         return fetch(YANDEX_FUNCTION_URL, {
             method: 'POST',
@@ -105,17 +106,19 @@ define(['managerAPI',
         })
         .then(function(response) {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Network response was not ok: ' + response.status);
             }
             return response.json();
         })
         .then(function(data) {
-            console.log('Data saved successfully:', data);
+            console.log('Data saved successfully to Yandex:', data);
         })
         .catch(function(error) {
             console.error('Error saving data:', error);
+            // Можно добавить alert, если хотите уведомить пользователя об ошибке
         });
     }
+
     API.addTasksSet({
         instructions: [{
             type: 'message',
@@ -170,17 +173,19 @@ define(['managerAPI',
             url: 'https://anketolog.ru/rs/993764/kI8Z0LUH' + respondentId 
         }],
 		
-uploading: [{
+        uploading: [{
             type: 'call',
             func: sendToYandex,
-            isAsync: true // Важно: ждем завершения отправки перед переходом дальше
-        }]    });
+            isAsync: true // Ждем завершения отправки
+        }]    
+    });
 
     // 3. ПОСЛЕДОВАТЕЛЬНОСТЬ ЗАДАНИЙ
     API.addSequence([
         { type: 'isTouch' }, // Определение тач-устройства
         
-        { type: 'post', path: ['$isTouch', 'raceSet', 'blackLabels', 'whiteLabels' 'respondentId'] },
+        // ИСПРАВЛЕНО: Добавлена запятая между whiteLabels и respondentId
+        { type: 'post', path: ['$isTouch', 'raceSet', 'blackLabels', 'whiteLabels', 'respondentId'] },
 
         {
             mixer:'branch',
