@@ -1,28 +1,21 @@
 define(['managerAPI',
 		'https://cdn.jsdelivr.net/gh/minnojs/minno-datapipe@1.*/datapipe.min.js'], function(Manager){
 
-    // 1. ПОЛУЧЕНИЕ ID РЕСПОНДЕНТА ИЗ ССЫЛКИ
-    // Скрипт ищет параметр 'uid' в адресной строке.
-    // Если ссылка вида: .../exampleiat.html?uid=USER_123
-    // То respondentId будет равен 'USER_123'
 	const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
 	const respondentId = urlParams.get('uid') || 'NO_ID'; 
 
 	var API    = new Manager();
 	
-    // Сохраняем ID глобально, чтобы он был доступен везде
 	API.addGlobal({
         respondentId: respondentId
     });
 
-	// Инициализация DataPipe для сохранения данных
 	init_data_pipe(API, 'gwZKTRm7QDHI',  {file_type:'csv'});	
 
     API.setName('mgr');
     API.addSettings('skip',true);
 
-    // Случайный выбор набора меток (raceSet)
     let raceSet = API.shuffle(['a','b'])[0];
     let blackLabels = [];
     let whiteLabels = [];
@@ -100,17 +93,12 @@ define(['managerAPI',
             header: 'You have completed the study'
         }], 
         
-       // 2. НАСТРОЙКА РЕДИРЕКТА
        redirect_success: [{ 
             type: 'redirect', 
             name: 'redirecting_success', 
-            // ВАЖНО: Замените ссылку ниже на ту, которую дал заказчик/партнер.
-            // Скрипт автоматически добавит ID (uid) и статус (complete).
-            // Например: 'https://panel-provider.com/complete?status=complete&uid=' + respondentId
-            url: 'https://YOUR-PARTNER-SITE.com/return?status=complete&uid=' + respondentId 
+            url: 'https://anketolog.ru/rs/993764/kI8Z0LUH' + respondentId 
         }],
 		
-		// Задача ожидания загрузки данных на сервер
         uploading: uploading_task({header: 'just a moment', body:'Please wait, sending data... '})
     });
 
@@ -120,7 +108,6 @@ define(['managerAPI',
         
         { type: 'post', path: ['$isTouch', 'raceSet', 'blackLabels', 'whiteLabels'] },
 
-        // Применение стилей для тач-устройств
         {
             mixer:'branch',
             conditions: {compare:'global.$isTouch', to: true},
@@ -161,7 +148,6 @@ define(['managerAPI',
             data:[
                 {inherit: 'explicits'},
 
-                // IAT тест и инструкции всегда вместе
                 {
                     mixer: 'wrapper',
                     data: [
@@ -176,7 +162,6 @@ define(['managerAPI',
 		{inherit: 'uploading'}, // Сначала загружаем данные
         {inherit: 'lastpage'},  // Показываем страницу "Спасибо"
         
-        // В самом конце - перенаправляем пользователя обратно к партнеру
         {inherit: 'redirect_success'}
 	]);
 
